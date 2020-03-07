@@ -1,30 +1,21 @@
 import cv2
 import numpy as np
-
-
-print("OpenCV version:")
-print(cv2.__version__)
-
-print("Attempting to find corners of chessboard")
+from picamera import PiCamera
+import time
 
 
 def main():
-	#import image from desktop
-	image = cv2.imread("sendtopi.png")
+	
+	camera = PiCamera()
+	#camera.rotation = 180
+	camera.capture('board.jpg')
+	"""
 	board_size = (7,7)
 	board = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	#finding the inner 7x7 corners in the board
 	found, inner_corners = cv2.findChessboardCorners(image, board_size)
-
-	if(not found):
-		print("Unable to find board in image")
-
-	for i in inner_corners:
-		print(i)
-
-	#testing = cv2.drawChessboardCorners(image, board_size, inner_corners, found)
-	#cv2.imwrite('board.jpg', testing)
-
+	"""
+	
 	#hardcoded outer corners of chess board measured using external software
 	#corners = np.zeros((4,2), dtype = "float32")
 	corners = ((23, 10), (490, 14), (490, 479), (22, 480))
@@ -32,13 +23,6 @@ def main():
 	just_board = perspective_transform(image, corners)
 
 	cv2.imwrite('just_board.jpg', just_board)
-	print(just_board.shape)
-
-#	cv2.imwrite('subsquare.jpg', subsquare(just_board,(3,5)))
-
-#((426,106), (2163,96),(2153,1810),(480,1826))
-
-#def find_board_state(transformed_image):
 
 def subsquare(image, index):
 	#board_size = (7,7)
