@@ -1,3 +1,22 @@
+typedef struct{
+	uint8_t sec;
+	uint8_t min;
+	uint8_t hour;
+	bool pm;
+	uint8_t wday;
+	uint8_t mday;
+	uint8_t month;
+	uint8_t year;
+	
+	uint8_t amin;
+	uint8_t ahour;
+	bool apm;
+	bool alarm;
+	
+	uint8_t stat;
+	uint8_t ctrl;
+}RTC_info;
+
 
 void init_i2c(void){
 	TWCR = 0;//reset control register
