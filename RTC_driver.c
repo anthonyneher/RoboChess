@@ -1,3 +1,6 @@
+
+#define DS3231_addr		0x68
+
 typedef struct{
 	uint8_t sec;
 	uint8_t min;
