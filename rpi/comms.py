@@ -24,7 +24,7 @@ def main():
             else: 
                 test_array[y][x] = 'e'
     test_array.tostring()
-    piece = 'p'
+    piece = 'p' 
     pickup = 45
     place = 37
     message = test_array.tostring() #+ piece #+ pickup + place
