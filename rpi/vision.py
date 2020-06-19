@@ -6,27 +6,41 @@ import picamera.array
 import time
 import os
 import warnings
+from game import *
+
+#manually determined
+corners = ((505, 107), (2235, 98), (2219, 1779), (565, 1824))
 
 blue_lower = (0,120,70)
 blue_upper = (20,255,255)
 orange_lower = (110,100,100)
 orange_upper = (120,255,255)
 
-def capture_board_state():
+def main():
+    warnings.filterwarnings("ignore")
+    camera = PiCamera()
+    camera.resolution = (2592, 1944)
+    camera.framerate = 15
+    #wait for board to be set up correctly
+    print(capture_board_state(camera))
+
+def capture_board_state(camera):
     board = np.empty((1952,2592,3), dtype=np.uint8)
     #Photograph board
     camera.capture(board, format='rgb')
     #raw camera capture produces BGR color pixels, converted to RGB using cv2
     board = cv2.cvtColor(board, cv2.COLOR_BGR2RGB)
-    board = perspective_transform(output, corners)
+    #cv2.imwrite('raw.jpg', board)
+    board = perspective_transform(board, corners)
     board = rotate(board, 90)
+    #cv2.imwrite('board.jpg', board)
     #produce color map based on board layout
     positions = read_board(board)
     return positions
 
 
 #used to simplify testing
-def board_setup_complete(map):
+def board_setup_complete(positions):
 
     for y in range(8):
         for x in range(8):
@@ -107,3 +121,9 @@ def perspective_transform(src_image, corners):
 	new_image = cv2.warpPerspective(src_image, matrix, (max_width, max_height))
 
 	return new_image
+
+
+"""
+if __name__ == '__main__':
+	main()
+"""

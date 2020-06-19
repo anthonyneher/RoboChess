@@ -3,14 +3,17 @@ import chess.engine
 #from chess import uci
 import numpy as np
 from copy import copy
+from comms import *
 
 
 BLACK = 2
 WHITE = 1
 
+moves_played = 0;
+
 def main():
     board = chess.Board()
-    engine = chess.engine.SimpleEngine.popen_uci("/Users/anthonyneher/senior/stockfish-11-mac/src/stockfish")
+    engine = chess.engine.SimpleEngine.popen_uci("/usr/games/stockfish")
 
     #create test matrix
     positions = create_colormap()
@@ -29,25 +32,13 @@ def main():
     engine.quit()
     print("\nTesting board novelty functions")
 
-    old = create_colormap()
-    new = create_colormap()
-    new[6][4] = 0
-    new[5][4] = 1
-    #new[3][4] = 1
-    print("Old:")
-    print(old)
-    print("New:")
-    print(new)
-    ret = novel_state(old, new)
-    print("Novel state returned: ", ret,"\n")
-
-    board = chess.Board()
+    print("first")
+    print(previous_board(board, 2, 1))
+    print("initial")
+    print(previous_board(board, 2, 0))
+    print("original")
     print(board)
-    print(new)
-    #wait until new board state determined
-    if(novel_state(old, new) == 1 and decode_move(board, new) != None):
-        print("Check passed")
-    else: print("Check failed")
+
 
 
 #used to simplify testing
@@ -97,6 +88,15 @@ def decode_move(current_board, color_mask):
     return None
 
 
+def previous_board(board, current, display):
+    prev = copy(board)
+    dif = (current-display)
+    if (dif < 0 or dif > current):
+        return None
+    for x in range(dif):
+        prev.pop()
+    return prev
+
 """
     Determines whether the board state is new and valid by cross referencing previous state
 input:
@@ -110,18 +110,30 @@ output:
 def novel_state(previous, current):
     prev_blank = 0
     prev_colored = 0
+    taken = 0
     for y in range(8):
         for x in range(8):
+            pcolored = False
+            pblank = False
             if previous[y][x] == 0 and current[y][x] != 0:
                 prev_blank += 1
+                pblank = True
             if previous[y][x] != 0 and current[y][x] == 0:
                 prev_colored += 1
-    if prev_blank == 1 and prev_colored == 1:
+                pcolored = True
+            if (previous[y][x] == 1 and current[y][x] == 2) or (previous[y][x] == 2 and current[y][x] == 1):
+                if pcolored == True and pblank == False:
+                    taken = taken + 1
+    if (prev_blank == 1 and prev_colored == 1) or taken == 1:
         return 1
     elif prev_colored > 1:
         return -1
     elif prev_blank > 1:
         return -2
+    elif taken > 1:
+        "taken too big"
+    else:
+        return "no change"
 
 
 if __name__ == '__main__':
