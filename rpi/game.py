@@ -14,7 +14,7 @@ moves_played = 0;
 def main():
     board = chess.Board()
     engine = chess.engine.SimpleEngine.popen_uci("/usr/games/stockfish")
-
+    #engine = chess.engine.SimpleEngine.popen_uci("~/.local/lib/python3.7/site-packages/stockfish")
     #create test matrix
     positions = create_colormap()
     positions[6][4] = 0

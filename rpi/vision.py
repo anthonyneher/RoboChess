@@ -9,14 +9,17 @@ import warnings
 from game import *
 
 #manually determined
-corners = ((505, 107), (2235, 98), (2219, 1779), (565, 1824))
+corners = ((538, 98), (2260, 76), (2274, 1778), (594, 1820))
 
-blue_lower = (0,120,70)
-blue_upper = (20,255,255)
+blue_lower = (0,0,0)
+blue_upper = (30,254,180)
+#blue_lower = (85,55,0)
+#blue_upper = (100,80,30)
 orange_lower = (110,100,100)
 orange_upper = (120,255,255)
 
 def main():
+    print("Starting test")
     warnings.filterwarnings("ignore")
     camera = PiCamera()
     camera.resolution = (2592, 1944)
@@ -30,10 +33,18 @@ def capture_board_state(camera):
     camera.capture(board, format='rgb')
     #raw camera capture produces BGR color pixels, converted to RGB using cv2
     board = cv2.cvtColor(board, cv2.COLOR_BGR2RGB)
-    #cv2.imwrite('raw.jpg', board)
+    cv2.imwrite('raw.jpg', board)
     board = perspective_transform(board, corners)
     board = rotate(board, 90)
-    #cv2.imwrite('board.jpg', board)
+    cv2.imwrite('board.jpg', board)
+    
+    hsv_img = cv2.cvtColor(board,cv2.COLOR_RGB2HSV)
+    print(hsv_img[528][342])
+    blue = cv2.inRange(hsv_img, blue_lower, blue_upper) 
+    orange = cv2.inRange(hsv_img, orange_lower, orange_upper)
+    cv2.imwrite('orange.jpg', orange)
+    cv2.imwrite('blue.jpg', blue)
+    
     #produce color map based on board layout
     positions = read_board(board)
     return positions
@@ -123,7 +134,7 @@ def perspective_transform(src_image, corners):
 	return new_image
 
 
-"""
+
 if __name__ == '__main__':
 	main()
-"""
+

@@ -36,6 +36,7 @@ def main():
     prevdisplayed = 0
     current = 0
     
+    
     #wait for board to be set up correctly
     current_state = capture_board_state(camera)
     print("Set up board")
@@ -48,6 +49,7 @@ def main():
     print("Ready to play!")
     #Send START command
     Start(spi)
+
     
     #Entering main loop
     while True:

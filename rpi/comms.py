@@ -20,6 +20,7 @@ MOVE = 0x01;
 DONE_YET = 0x02;
 ANY_NEW = 0x03;
 BOARD_DISPLAY = 0x04;
+TAKE = 0x05;
 
 def main():
     spi = init_spi()
@@ -37,22 +38,29 @@ def main():
         Start(spi)
         
         input("send move")
-        move = chess.Move.from_uci("d2d3")
-        Move(spi, move)
+        move = chess.Move.from_uci("e2e3")
+        Move(spi, move, chess.QUEEN)
         
+        input("send take")
+        move = chess.Move.from_uci("d2d3")
+        Take(spi, move, chess.PAWN, chess.QUEEN)
         
         input("send move")
         move = chess.Move.from_uci("e2e3")
-        Move(spi, move)
+        Move(spi, move, chess.QUEEN)
+            
         
         input("send check for new values command")
         new = CheckNew(spi)
         print("Returned ", new)
-        
+        """
         input("send new board display")
         print(board)
         BoardDisplay(spi, board)
-        
+        """
+        input("send check for new values command")
+        new = DoneYet(spi)
+        print("Returned ", new)
         
 def init_spi():
     spi = spidev.SpiDev()
@@ -66,12 +74,21 @@ def Start(spi):
     gbg = spi.xfer([START])
     return
 
-def Move(spi, move):
-    pickup = move.from_square
-    place = move.to_square
+def Move(spi, move, place):
+    From = move.from_square
+    to = move.to_square
+    print(place)
+    message = [MOVE, From, to, place]
+    spi.xfer2(message)
+    return
+    
+def Take(spi, move, place, pickup):
+    From = move.from_square
+    to = move.to_square
     print(pickup)
     print(place)
-    message = [MOVE, pickup, place]
+    
+    message = [TAKE, From, to, place, pickup]
     spi.xfer2(message)
     return
     
