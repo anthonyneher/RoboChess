@@ -64,7 +64,10 @@ def main():
         time.sleep(1)
         #Photograph board and decode state
         current_state = capture_board_state(camera)
+        print("Waiting for valid move")
+        print(board)
         print(current_state)
+        
         move = decode_move(board, current_state)
         if move != None:
             current_state = capture_board_state(camera)
@@ -81,12 +84,13 @@ def main():
                 print(board)
 
                 current = current + 2
-                time.sleep(2)
+                time.sleep(1)
                 print("Waiting for done signal")
+                DoneYet(spi)
                 while(DoneYet(spi) == 0):
                     time.sleep(2)
-                    current_state = capture_board_state(camera)
-                print("Please implement blue's move on the board")
+                    #current_state = capture_board_state(camera)
+                print("Done")
 
                 while(not np.array_equal(current_color_mask(board), current_state)):
                     current_state = capture_board_state(camera)
