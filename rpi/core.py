@@ -30,6 +30,12 @@ def main():
     camera = PiCamera()
     camera.resolution = (2592, 1944)
     camera.framerate = 15
+    
+    #used to first capture does not update color spectrum
+    update = np.empty((1952,2592,3), dtype=np.uint8)
+    camera.capture(update, format='rgb')
+    time.sleep(0.1)
+    
     spi = init_spi()
     
     displayed = 0
@@ -40,9 +46,11 @@ def main():
     #wait for board to be set up correctly
     current_state = capture_board_state(camera)
     print("Set up board")
- 
+    print(current_state)
+    
     while not board_setup_complete(current_state):
         current_state = capture_board_state(camera)
+        print(current_state)
 
     board = chess.Board()
 
@@ -53,8 +61,10 @@ def main():
     
     #Entering main loop
     while True:
+        time.sleep(1)
         #Photograph board and decode state
         current_state = capture_board_state(camera)
+        print(current_state)
         move = decode_move(board, current_state)
         if move != None:
             current_state = capture_board_state(camera)
@@ -62,10 +72,14 @@ def main():
             if (current_move != None) and (current_move == move):
                 board.push(move)
                 result = engine.play(board, chess.engine.Limit(time=0.5))
+                if board.piece_at(result.move.to_square):
+                    Take(spi, result.move, int(board.piece_at(result.move.from_square).piece_type), int(board.piece_at(result.move.to_square).piece_type))
+                else:
+                    Move(spi, result.move, int(board.piece_at(result.move.from_square).piece_type))
+                
                 board.push(result.move)
                 print(board)
-                
-                Move(spi, result.move)
+
                 current = current + 2
                 time.sleep(2)
                 print("Waiting for done signal")
@@ -77,9 +91,9 @@ def main():
                 while(not np.array_equal(current_color_mask(board), current_state)):
                     current_state = capture_board_state(camera)
                 print("Orange's move")
-        
+        """
         else:
-            #time.sleep(1)
+            time.sleep(1)
             #check to see if user wants to have different state displayed on monitor
             displayed = CheckNew(spi)
             while(displayed > current):
@@ -98,7 +112,7 @@ def main():
                 print(sendboard)
                 BoardDisplay(spi, sendboard)
                 prevdisplayed = displayed
-           
+           """
                 
                 
 

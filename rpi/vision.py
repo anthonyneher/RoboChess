@@ -11,8 +11,9 @@ from game import *
 #manually determined
 corners = ((538, 98), (2260, 76), (2274, 1778), (594, 1820))
 
-blue_lower = (0,0,0)
-blue_upper = (30,254,180)
+blue_lower = (0,210,30)
+#blue_upper = (20,254,180)
+blue_upper = (15,255,100)
 #blue_lower = (85,55,0)
 #blue_upper = (100,80,30)
 orange_lower = (110,100,100)
@@ -24,27 +25,34 @@ def main():
     camera = PiCamera()
     camera.resolution = (2592, 1944)
     camera.framerate = 15
+    
+    update = np.empty((1952,2592,3), dtype=np.uint8)
+    camera.capture(update, format='rgb')
+    time.sleep(0.1)
+    
     #wait for board to be set up correctly
     print(capture_board_state(camera))
 
 def capture_board_state(camera):
     board = np.empty((1952,2592,3), dtype=np.uint8)
     #Photograph board
+    #camera.capture(board, format = 'bgr')
     camera.capture(board, format='rgb')
     #raw camera capture produces BGR color pixels, converted to RGB using cv2
     board = cv2.cvtColor(board, cv2.COLOR_BGR2RGB)
-    cv2.imwrite('raw.jpg', board)
+    #cv2.imwrite('raw.jpg', board)
     board = perspective_transform(board, corners)
     board = rotate(board, 90)
-    cv2.imwrite('board.jpg', board)
+    #cv2.imwrite('board.jpg', board)
     
+    """
     hsv_img = cv2.cvtColor(board,cv2.COLOR_RGB2HSV)
     print(hsv_img[528][342])
     blue = cv2.inRange(hsv_img, blue_lower, blue_upper) 
     orange = cv2.inRange(hsv_img, orange_lower, orange_upper)
     cv2.imwrite('orange.jpg', orange)
     cv2.imwrite('blue.jpg', blue)
-    
+    """
     #produce color map based on board layout
     positions = read_board(board)
     return positions
