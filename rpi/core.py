@@ -64,10 +64,11 @@ def main():
         time.sleep(1)
         #Photograph board and decode state
         current_state = capture_board_state(camera)
+        """
         print("Waiting for valid move")
         print(board)
         print(current_state)
-        
+        """
         move = decode_move(board, current_state)
         if move != None:
             current_state = capture_board_state(camera)
@@ -95,14 +96,23 @@ def main():
                 while(not np.array_equal(current_color_mask(board), current_state)):
                     current_state = capture_board_state(camera)
                 print("Orange's move")
-        """
+
         else:
-            time.sleep(1)
+            time.sleep(2)
             #check to see if user wants to have different state displayed on monitor
-            displayed = CheckNew(spi)
+#            displayed= CheckNew(spi)
+            displayed, reset_game, difficulty = CheckNew(spi)
+
+            print("current " + str(current))
+            print("displayed " + str(displayed))
+            print("difficulty " + str(difficulty))
+            print("reset game " + str(reset_game))
+            
             while(displayed > current):
+                time.sleep(3)
                 print(displayed)
-                displayed = CheckNew(spi)
+                displayed, reset_game, difficulty = CheckNew(spi)
+ #               displayed = CheckNew(spi)
             if(displayed != prevdisplayed):
                 #send new board state
                 print("Current board state")
@@ -110,13 +120,16 @@ def main():
                 print("displayed board state")
                 print(displayed)
                 print("sendboard")
+                #sendboard = previous_board(board, current, current)
                 sendboard = previous_board(board, current, displayed)
                 while(sendboard == None):
                     sendboard = previous_board(board, current, displayed)
+                print("board about to be updated")
                 print(sendboard)
+                #input("Send Board")
                 BoardDisplay(spi, sendboard)
                 prevdisplayed = displayed
-           """
+           
                 
                 
 

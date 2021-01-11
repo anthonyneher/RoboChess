@@ -5,22 +5,13 @@ import spidev
 import time
 import chess
 
-"""
-creating bytestream to be sent via SPI
-will be recieved into:
-struct move{
-    char pieces[64];
-    char piece_type;
-    uint8_t pickup;
-    uint8_t place;
-}
-"""
-START = 0x00;
-MOVE = 0x01;
-DONE_YET = 0x02;
-ANY_NEW = 0x03;
+
+START =         0x00;
+MOVE =          0x01;
+DONE_YET =      0x02;
+ANY_NEW =       0x03;
 BOARD_DISPLAY = 0x04;
-TAKE = 0x05;
+TAKE =          0x05;
 
 def main():
     spi = init_spi()
@@ -36,18 +27,19 @@ def main():
     while True:
         input("send START")
         Start(spi)
-        
+        """
         input("send move")
-        move = chess.Move.from_uci("e2e3")
+        move = chess.Move.from_uci("b8b7")
         Move(spi, move, chess.QUEEN)
-        
+        """
+        input("send move")
+        move = chess.Move.from_uci("b2b1")
+        Move(spi, move, chess.QUEEN)
+
         input("send take")
-        move = chess.Move.from_uci("d2d3")
-        Take(spi, move, chess.PAWN, chess.QUEEN)
-        
-        input("send move")
-        move = chess.Move.from_uci("e2e3")
+        move = chess.Move.from_uci("b1b2")
         Move(spi, move, chess.QUEEN)
+        #Take(spi, move, chess.PAWN, chess.QUEEN)
             
         
         input("send check for new values command")
@@ -98,10 +90,11 @@ def DoneYet(spi):
     return data[1]
 
 def CheckNew(spi):
-    message = [ANY_NEW, 0]
+    message = [ANY_NEW, 0, 0, 0]
     data = spi.xfer2(message)
-    return data[1]
-    
+    #expected return values: displayed, reset, difficulty
+    return data[1], data[2], data[3]
+
 def BoardDisplay(spi, board):
     #in this instance board is a numpy character array
     message = to_char(board)
