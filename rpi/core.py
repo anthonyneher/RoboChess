@@ -61,7 +61,7 @@ def main():
     
     #Entering main loop
     while True:
-        time.sleep(1)
+        time.sleep(0.25)
         #Photograph board and decode state
         current_state = capture_board_state(camera)
         """
@@ -75,6 +75,8 @@ def main():
             current_move = decode_move(board, current_state)
             if (current_move != None) and (current_move == move):
                 board.push(move)
+                if(current == displayed):
+                    BoardDisplay(spi, board)
                 result = engine.play(board, chess.engine.Limit(time=0.5))
                 if board.piece_at(result.move.to_square):
                     Take(spi, result.move, int(board.piece_at(result.move.from_square).piece_type), int(board.piece_at(result.move.to_square).piece_type))
@@ -83,7 +85,7 @@ def main():
                 
                 board.push(result.move)
                 print(board)
-
+                
                 current = current + 2
                 time.sleep(1)
                 print("Waiting for done signal")
@@ -98,37 +100,52 @@ def main():
                 print("Orange's move")
 
         else:
-            time.sleep(2)
+            time.sleep(0.25)
             #check to see if user wants to have different state displayed on monitor
-#            displayed= CheckNew(spi)
-            displayed, reset_game, difficulty = CheckNew(spi)
-
-            print("current " + str(current))
-            print("displayed " + str(displayed))
-            print("difficulty " + str(difficulty))
-            print("reset game " + str(reset_game))
+ 
+            if(CheckReset(spi)):
+                blank_board = chess.Board()
+                BoardDisplay(spi, blank_board)
+                board = chess.Board()
+                displayed = 0
+                current = 0
+                while not board_setup_complete(current_state):
+                    current_state = capture_board_state(camera)
+                    print(current_state)
+                    time.sleep(2)
+                
+                
+                    
+                
+            displayed= CheckNew(spi)
+#            displayed, reset_game, difficulty = CheckNew(spi)
             
             while(displayed > current):
                 time.sleep(3)
                 print(displayed)
-                displayed, reset_game, difficulty = CheckNew(spi)
- #               displayed = CheckNew(spi)
-            if(displayed != prevdisplayed):
+ #               displayed, reset_game, difficulty = CheckNew(spi)
+                displayed = CheckNew(spi)
+ 
+            #if(displayed != prevdisplayed):
                 #send new board state
-                print("Current board state")
-                print(current)
-                print("displayed board state")
-                print(displayed)
-                print("sendboard")
-                #sendboard = previous_board(board, current, current)
+            print("\n")
+            print("Current board state")
+            print(current)
+            print("displayed board state")
+            print(displayed)
+            print("previously displayed board state")
+            print(prevdisplayed)
+            #sendboard = previous_board(board, current, current)
+            sendboard = previous_board(board, current, displayed)
+            """
+            while(sendboard == None):
                 sendboard = previous_board(board, current, displayed)
-                while(sendboard == None):
-                    sendboard = previous_board(board, current, displayed)
-                print("board about to be updated")
-                print(sendboard)
-                #input("Send Board")
-                BoardDisplay(spi, sendboard)
-                prevdisplayed = displayed
+            """
+            print("board about to be updated")
+            print(sendboard)
+            #input("Send Board")
+            BoardDisplay(spi, sendboard)
+            #prevdisplayed = displayed
            
                 
                 

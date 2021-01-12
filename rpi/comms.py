@@ -12,6 +12,7 @@ DONE_YET =      0x02;
 ANY_NEW =       0x03;
 BOARD_DISPLAY = 0x04;
 TAKE =          0x05;
+RESET =         0x06;
 
 def main():
     spi = init_spi()
@@ -35,6 +36,9 @@ def main():
         input("send move")
         move = chess.Move.from_uci("b2b1")
         Move(spi, move, chess.QUEEN)
+        
+        input("send reset")
+        CheckReset(spi)      
 
         input("send take")
         move = chess.Move.from_uci("b1b2")
@@ -90,10 +94,15 @@ def DoneYet(spi):
     return data[1]
 
 def CheckNew(spi):
-    message = [ANY_NEW, 0, 0, 0]
+    message = [ANY_NEW, 0]#, 0, 0]
     data = spi.xfer2(message)
     #expected return values: displayed, reset, difficulty
-    return data[1], data[2], data[3]
+    return data[1]#, data[2], data[3]
+
+def CheckReset(spi):
+    message = [RESET, 0]
+    data = spi.xfer2(message)
+    return data[1]
 
 def BoardDisplay(spi, board):
     #in this instance board is a numpy character array

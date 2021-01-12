@@ -45,14 +45,14 @@ def capture_board_state(camera):
     board = rotate(board, 90)
     #cv2.imwrite('board.jpg', board)
     
-    
+    """    
     hsv_img = cv2.cvtColor(board,cv2.COLOR_RGB2HSV)
 
     blue = cv2.inRange(hsv_img, blue_lower, blue_upper) 
     orange = cv2.inRange(hsv_img, orange_lower, orange_upper)
     cv2.imwrite('orange.jpg', orange)
     cv2.imwrite('blue.jpg', blue)
-    
+   """ 
     #produce color map based on board layout
     positions = read_board(board)
     return positions
