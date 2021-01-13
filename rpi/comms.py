@@ -25,6 +25,9 @@ def main():
     board = chess.Board()
     move = chess.Move.from_uci("d2d3")
     board.push(move)
+    if(move.uci() == "d2d3"):
+        print("test")
+    print(move)
     while True:
         input("send START")
         Start(spi)
@@ -109,7 +112,6 @@ def BoardDisplay(spi, board):
     message = to_char(board)
     message[0] = '\x04'
 
-    print(message)
     spi.writebytes2(message)
     
 def to_char(board):
