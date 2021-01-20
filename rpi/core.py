@@ -41,6 +41,7 @@ def main():
     displayed = 0
     prevdisplayed = 0
     current = 0
+    difficulty = 1
     
     
     #wait for board to be set up correctly
@@ -61,7 +62,7 @@ def main():
     
     #Entering main loop
     while True:
-        time.sleep(0.25)
+        time.sleep(0.1)
         #Photograph board and decode state
         current_state = capture_board_state(camera)
         """
@@ -75,45 +76,51 @@ def main():
             current_state = capture_board_state(camera)
             current_move = decode_move(board, current_state)
             if (current_move != None) and (current_move == move):
-                #board.push(move)
+                board.push(move)
                 if(current == displayed):
                     #update players resposne to screen
                     BoardDisplay(spi, board)
                     
                 #calculate compuers response
-                result = engine.play(board, chess.engine.Limit(time=0.5))
-                result.move = chess.Move.from_uci("e8g8")
-                if (False):
-                #if board.piece_at(result.move.to_square):
+                
+                if difficulty == 1:
+                    result = engine.play(board, chess.engine.Limit(time=0.001, depth = 1))
+                elif difficulty == 2:
+                    result = engine.play(board, chess.engine.Limit(time=0.05, depth = 5))                
+                else:
+                    result = engine.play(board, chess.engine.Limit(time=0.1, depth = 20))
+                
+                #result.move = chess.Move.from_uci("e8c8")
+                #if False:
+                if board.piece_at(result.move.to_square):
                     Take(spi, result.move, int(board.piece_at(result.move.from_square).piece_type), int(board.piece_at(result.move.to_square).piece_type))
                 else:
                     if(board.piece_at(result.move.from_square).piece_type == chess.KING and (result.move.uci() == "e8g8" or result.move.uci() == "e8c8")):
                         print("Yeah")
-                        if(result.move.uci() == "e8g8"):                            
-                            Move(spi, result.move, int(board.piece_at(result.move.from_square).piece_type))
-                            time.sleep(1)
-                            while(DoneYet(spi) == 0):
-                                time.sleep(2)
-                            print("Moving Rook")
-                            Move(spi, chess.Move.from_uci("h8f8"), int(chess.ROOK))
+                        if(result.move.uci() == "e8g8"):
+                            print("Castle")
+                            time.sleep(0.3)       
+                            Castle(spi, KINGSIDE)
+                            time.sleep(2)
+                            while(DoneYet(spi) != 1):
+                                time.sleep(1)
                         if(result.move.uci() == "e8c8"):
-                            Move(spi, result.move, int(board.piece_at(result.move.from_square).piece_type))
-                            time.sleep(1)
-                            while(DoneYet(spi) == 0):
-                                time.sleep(2)
-                            print("Moving Rook")
-                            Move(spi, chess.Move.from_uci("a8d8"), int(chess.ROOK))
+                            print("Queenside castle")
+                            time.sleep(0.3)
+                            Castle(spi, QUEENSIDE)
+                            time.sleep(2)
+                            while(DoneYet(spi) != 1):
+                                time.sleep(1)
                     else:
                         print("else")
                         Move(spi, result.move, int(board.piece_at(result.move.from_square).piece_type))
                 
-                #board.push(result.move)
+                board.push(result.move)
                 print(board)
                 print(move)
                 time.sleep(1)
                 print("Waiting for done signal")
-                DoneYet(spi)
-                while(DoneYet(spi) == 0):
+                while(DoneYet(spi) != 1):
                     time.sleep(2)
                     #current_state = capture_board_state(camera)
                 print("Done")
@@ -128,10 +135,10 @@ def main():
                 print("Orange's move")
 
         else:
-            time.sleep(0.25)
+            time.sleep(0.3)
             #check to see if user wants to have different state displayed on monitor
  
-            if(CheckReset(spi)):
+            if(CheckReset(spi) == 1):
                 time.sleep(0.5)
                 if not CheckReset(spi):
                     break
@@ -148,7 +155,9 @@ def main():
                     print("Waiting for board to be reset")
                     time.sleep(2)
             else:
-                
+                time.sleep(0.15)
+                difficulty = CheckDif(spi)
+                time.sleep(0.15)
                 
                 displayed= CheckNew(spi)
     #            displayed, reset_game, difficulty = CheckNew(spi)
@@ -166,13 +175,14 @@ def main():
                 print(current)
                 print("displayed board state")
                 print(displayed)
+
                 sendboard = previous_board(board, current, displayed)
                 """
                 while(sendboard == None):
                     sendboard = previous_board(board, current, displayed)
                 """
                 print("board about to be updated")
-
+                time.sleep(0.15)
                 #input("Send Board")
                 BoardDisplay(spi, sendboard)
                 #prevdisplayed = displayed

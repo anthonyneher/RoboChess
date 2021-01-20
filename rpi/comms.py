@@ -13,6 +13,12 @@ ANY_NEW =       0x03;
 BOARD_DISPLAY = 0x04;
 TAKE =          0x05;
 RESET =         0x06;
+CASTLE =        0x07;
+DIFFICULTY =    0x08;
+
+CASTLING =      0x09;
+KINGSIDE =      0x01;
+QUEENSIDE =     0x00;
 
 def main():
     spi = init_spi()
@@ -31,6 +37,24 @@ def main():
     while True:
         input("send START")
         Start(spi)
+        
+        input("Kingside")
+        Castle(spi, KINGSIDE)
+        
+        input("Queenside")
+        Castle(spi, QUEENSIDE)
+        
+        input("send take")
+        move = chess.Move.from_uci("b7b8")
+        Take(spi, move, chess.PAWN, chess.QUEEN)
+        
+        input("send take")
+        move = chess.Move.from_uci("c8a7")
+        Take(spi, move, chess.PAWN, chess.QUEEN)
+        
+        input("send take")
+        move = chess.Move.from_uci("a7b8")
+        Take(spi, move, chess.PAWN, chess.QUEEN)
         """
         input("send move")
         move = chess.Move.from_uci("b8b7")
@@ -45,8 +69,7 @@ def main():
 
         input("send take")
         move = chess.Move.from_uci("b1b2")
-        Move(spi, move, chess.QUEEN)
-        #Take(spi, move, chess.PAWN, chess.QUEEN)
+        Take(spi, move, chess.PAWN, chess.QUEEN)
             
         
         input("send check for new values command")
@@ -73,6 +96,16 @@ def Start(spi):
     gbg = spi.xfer([START])
     return
 
+def Castle(spi):
+    #use this funciton while castle to decrement far side count
+    gbg = spi.xfer([CASTLE])
+    return
+    
+def Castle(spi, side):
+    #use this funciton while castle to decrement far side count
+    gbg = spi.xfer([CASTLING, side])
+    return
+
 def Move(spi, move, place):
     From = move.from_square
     to = move.to_square
@@ -84,9 +117,7 @@ def Move(spi, move, place):
 def Take(spi, move, place, pickup):
     From = move.from_square
     to = move.to_square
-    print(pickup)
-    print(place)
-    
+
     message = [TAKE, From, to, place, pickup]
     spi.xfer2(message)
     return
@@ -113,7 +144,12 @@ def BoardDisplay(spi, board):
     message[0] = '\x04'
 
     spi.writebytes2(message)
-    
+
+def CheckDif(spi):
+    message = [DIFFICULTY, 0]
+    data = spi.xfer2(message)
+    return data[1]
+
 def to_char(board):
     positions = np.chararray(65)
     for x in range(64):
